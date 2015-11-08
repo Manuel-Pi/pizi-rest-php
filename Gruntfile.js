@@ -2,21 +2,25 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		srcFile: 'src/',
 		build: 'build/',
+		libs: 'vendor/',
 		testFile: 'tests/',
-		serverFolder: 'C:/dev/appl/apache-2.2.22/htdocs/pizi-rest/',
+		serverFolder: 'C:/wamp/www/pizi-rest',
 		copy: {
 			deployDev : {
 				files : [
 					{
 						expand: true,
 						cwd: '<%= srcFile %>',
-						src: ['**'],
+						src: [
+							'**',
+							'.htaccess',
+							],
 						dest: '<%= serverFolder %>'
 					},
 					{
 						expand: true,
-						cwd: '<%= testFile %>',
-						src: ['**'],
+						cwd: '<%= libs %>',
+						src: ['**/*.php'],
 						dest: '<%= serverFolder %>'
 					}
 				]
