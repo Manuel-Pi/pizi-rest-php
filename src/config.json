@@ -4,5 +4,10 @@
 		"host": "localhost",
 		"user": "root",
 		"password": "p455"
+	},
+	"restrictions": {
+		"user": {
+			"write": "admin"
+		}
 	}
 }

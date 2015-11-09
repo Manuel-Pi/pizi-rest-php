@@ -16,8 +16,15 @@ try{
 	$app->notFound();
 }
 
+// Check if the user is allowed to access to the specified store
 function checkAccess($store){
-	return true;
+	$allowed = true;
+	echo "zazou";
+	// Check if a restriction is defined for the store
+	if($config->restrictions->$store != null){
+		$allowed = false;
+	}
+	return $allowed;
 }
 
 if($config != null){
@@ -38,15 +45,22 @@ if($config != null){
 	// Define get store
 	$app->get('/:store', function($store) use($app, $bdd) {
 		// Check store name to avoid sql injections
-		if(preg_match('/^(\w|_)+$/', $store) == 0) $app->notFound();
-		try{
-			$query = $bdd->prepare('SELECT * FROM '.$store);
-			$query->execute();
-			$results = $query->fetchAll(PDO::FETCH_OBJ);
-			$app->response->setStatus(200);
-			$app->response()->header('Content-Type', 'application/json');
-			print json_encode($results);
-		} catch(PDOException $e){
+		if(preg_match('/^(\w|_)+$/', $store)){
+			if(checkAccess($store)){
+				/*try{
+					$query = $bdd->prepare('SELECT * FROM '.$store);
+					$query->execute();
+					$results = $query->fetchAll(PDO::FETCH_OBJ);
+					$app->response->setStatus(200);
+					$app->response()->header('Content-Type', 'application/json');
+					print json_encode($results);
+				} catch(PDOException $e){
+					$app->notFound();
+				}*/
+			} else {
+				$app->response->setStatus(403);
+			}
+		} else {
 			$app->notFound();
 		}
 	});
@@ -121,6 +135,5 @@ if($config != null){
 		}
 	});
 }
-
 
 $app->run();
