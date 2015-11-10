@@ -3,7 +3,7 @@
 		"name": "pizi",
 		"host": "localhost",
 		"user": "root",
-		"password": "p455"
+		"password": ""
 	},
 	"restrictions": {
 		"user": {

@@ -9,6 +9,7 @@ require 'autoload.php';
 $app = new \Slim\Slim();	
 
 // Get config from config.json file
+$config;
 try{
 	$config = file_get_contents('config.json');
 	$config = json_decode($config);
@@ -19,7 +20,7 @@ try{
 // Check if the user is allowed to access to the specified store
 function checkAccess($store){
 	$allowed = true;
-	echo "zazou";
+	global $config;
 	// Check if a restriction is defined for the store
 	if($config->restrictions->$store != null){
 		$allowed = false;
@@ -47,7 +48,7 @@ if($config != null){
 		// Check store name to avoid sql injections
 		if(preg_match('/^(\w|_)+$/', $store)){
 			if(checkAccess($store)){
-				/*try{
+				try{
 					$query = $bdd->prepare('SELECT * FROM '.$store);
 					$query->execute();
 					$results = $query->fetchAll(PDO::FETCH_OBJ);
@@ -56,9 +57,9 @@ if($config != null){
 					print json_encode($results);
 				} catch(PDOException $e){
 					$app->notFound();
-				}*/
+				}
 			} else {
-				$app->response->setStatus(403);
+				$app->halt(403, "You are not autorized to proceed this request!");
 			}
 		} else {
 			$app->notFound();
