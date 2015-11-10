@@ -1,9 +1,11 @@
 <?php
 // Define error reporting (don't report warning)
 error_reporting(E_ERROR | E_PARSE);
+date_default_timezone_set('UTC');
 
 // Load libraries
 require 'autoload.php';
+use \Firebase\JWT\JWT;
 
 // Get a Slim object
 $app = new \Slim\Slim();	
@@ -18,19 +20,28 @@ try{
 }
 
 // Check if the user is allowed to access to the specified store
-function checkAccess($store){
-	$allowed = true;
+function checkAccess($bdd, $store){
 	global $config;
+	global $app;
+	$allowed = false;
 	// Check if a restriction is defined for the store
 	if($config->restrictions->$store != null){
-		$allowed = false;
+		$headers = $app->request->headers;
+		if($headers->get('authorization2')){
+			list($jwt) = sscanf( $headers->get('authorization2'), 'Bearer %s');
+			try{
+				$token = JWT::decode($jwt, $config->tokenKey, array('HS256'));
+				$allowed = true;
+			} catch(Exception $e){
+			}
+		}
+	} else {
+		$allowed = true;
 	}
 	return $allowed;
 }
 
 if($config != null){
-	
-	$headers = $app->request->headers;
 
 	// Create the connection to DB
 	$bdd = new PDO('mysql:host='.$config->db->host.';dbname='.$config->db->name.';charset=utf8', $config->db->user, $config->db->password);
@@ -43,11 +54,44 @@ if($config != null){
 		echo "Pizi REST API";
 	});
 	
+	// Define base url API
+	$app->get('/token', function() use($app, $bdd, $config) {
+		$token;
+		$headers = $app->request->headers;
+		if($headers->get('login') && $headers->get('password')){
+			try{
+				$query = $bdd->prepare('SELECT * FROM user where login = :login AND password = :password LIMIT 1' );
+				$query->execute(array(
+					':login' => $headers->get('login'),
+					':password' => $headers->get('password')
+				));
+				$result = $query->fetchAll(PDO::FETCH_OBJ);
+				if(sizeof($result) > 0 && $result[0]->role == 1){
+					$time = time();
+					$token = array(
+						"iss" => "http://pizi-rest",
+						"iat" => $time,
+						"exp" => $time + 60,
+						"user" => $headers->get('login')
+					);
+				}
+			} catch(PDOException $e){
+			}
+		}
+		if($token != null){
+			$app->response->setStatus(200);
+			$app->response()->header('Content-Type', 'application/json');
+			print json_encode(array("jwt" => JWT::encode($token, $config->tokenKey)));
+		} else {
+			
+		}
+	});
+	
 	// Define get store
 	$app->get('/:store', function($store) use($app, $bdd) {
 		// Check store name to avoid sql injections
 		if(preg_match('/^(\w|_)+$/', $store)){
-			if(checkAccess($store)){
+			if(checkAccess($bdd, $store)){
 				try{
 					$query = $bdd->prepare('SELECT * FROM '.$store);
 					$query->execute();

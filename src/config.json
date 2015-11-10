@@ -3,8 +3,9 @@
 		"name": "pizi",
 		"host": "localhost",
 		"user": "root",
-		"password": ""
+		"password": "p455"
 	},
+	"tokenKey": "p!z!R35t",
 	"restrictions": {
 		"user": {
 			"write": "admin"
