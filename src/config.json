@@ -3,9 +3,13 @@
 		"name": "pizi",
 		"host": "localhost",
 		"user": "root",
-		"password": "p455"
+		"password": ""
 	},
-	"tokenKey": "p!z!R35t",
+	"token": {
+		"key": "p!z!R35t",
+		"issuer": "http://pizi-rest",
+		"expiration": 3600
+	},
 	"restrictions": {
 		"user": {
 			"write": "admin"

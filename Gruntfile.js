@@ -4,8 +4,9 @@ module.exports = function(grunt) {
 		build: 'build/',
 		libs: 'vendor/',
 		testFile: 'tests/',
-		//serverFolder: 'C:/wamp/www/pizi-rest',
-		serverFolder: 'C:/dev/appl/apache-2.2.22/htdocs/pizi-rest',
+		serverFolder: 'C:/wamp/www/pizi-rest',
+		testServerFolder: 'C:/wamp/www/pizi-rest-test',
+		//serverFolder: 'C:/dev/appl/apache-2.2.22/htdocs/pizi-rest',
 		copy: {
 			deployDev : {
 				files : [
@@ -22,7 +23,23 @@ module.exports = function(grunt) {
 						expand: true,
 						cwd: '<%= libs %>',
 						src: ['**/*.php'],
-						dest: '<%= serverFolder %>'
+						dest: '<%= serverFolder %>/lib'
+					},
+					{
+						expand: true,
+						cwd: '<%= testFile %>',
+						src: ['**'],
+						dest: '<%= testServerFolder %>'
+					},
+					{
+						expand: true,
+						cwd: 'node_modules/',
+						src: [
+							'jquery/dist/jquery.min.js',
+							'qunitjs/qunit/**'
+							],
+						dest: '<%= testServerFolder %>',
+						flatten: true
 					}
 				]
 			}
