@@ -3,12 +3,17 @@
 		"name": "pizi",
 		"host": "localhost",
 		"user": "root",
-		"password": "p455"
+		"password": ""
 	},
 	"tokenKey": "p!z!R35t",
 	"restrictions": {
+		"all": {
+			"put": 1,
+			"post": 1,
+			"delete": 1
+		},
 		"user": {
-			"write": "admin"
+			"get": 1
 		}
 	}
 }
