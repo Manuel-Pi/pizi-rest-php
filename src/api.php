@@ -153,6 +153,7 @@ if($config != null){
 			if(checkAccess($bdd, $store)){
 				try{
 					// Get and decode JSON request body
+					
 					$request = $app->request();
 					$body = $request->getBody();
 					// Parse json
@@ -171,9 +172,10 @@ if($config != null){
 					$query->execute(array(':login' => $id));
 					$app->response->setStatus(200);
 					$app->response()->header('Content-Type', 'application/json');
+					print json_encode(array());
 				} catch(PDOException $e){
-					//$app->notFound();
-					echo $e->getMessage();
+					$app->notFound();
+					//echo $e->getMessage();
 				}
 			}
 		} else {

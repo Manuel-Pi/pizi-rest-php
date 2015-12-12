@@ -8,7 +8,7 @@
 	"token": {
 		"key": "p!z!R35t",
 		"issuer": "http://pizi-rest",
-		"expiration": 3600
+		"expiration": 60
 	},
 	"restrictions": {
 		"user": {
