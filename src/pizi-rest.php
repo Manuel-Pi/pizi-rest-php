@@ -114,7 +114,7 @@ if($config != null){
 				$query = $bdd->prepare('SELECT * FROM user where login = :login AND password = :password LIMIT 1' );
 				$query->execute(array(
 					':login' => $login,
-					':password' => $password
+					':password' => hash('sha256', $password)
 				));
 				$result = $query->fetchAll(PDO::FETCH_OBJ);
 				if(sizeof($result) > 0){
@@ -183,6 +183,11 @@ if($config != null){
             }
 			$query->execute();
 			$results = $query->fetchAll(PDO::FETCH_OBJ);
+
+			for($i = 0; $i < sizeof($results); $i++){
+				unset($results[0]->password);
+			}
+
 			return jsonResponse($res, 200, $results);
 		} catch(PDOException $e){
 			return serverError($res, "Error with db!" . $e);
@@ -202,6 +207,7 @@ if($config != null){
 			$query->execute(array(':login' => $id));
 			$result = $query->fetchAll(PDO::FETCH_OBJ);
 			if(sizeof($result) > 0){
+				unset($result[0]->password);
 				return jsonResponse($res, 200, $result[0]);
 			}else{
 				return serverError($res, "No item!");
