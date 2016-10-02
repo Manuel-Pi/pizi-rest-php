@@ -2,5 +2,5 @@ Options +FollowSymLinks
 RewriteEngine On
 RewriteCond %{HTTP:Authorization} ^(.*)
 RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
-RewriteRule ^(.)*$ pizi-rest.php [L]
-
+RewriteBase /pizi-rest/
+RewriteRule ^(.)*$ "pizi-rest.php" [L]

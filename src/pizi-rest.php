@@ -27,15 +27,15 @@ if($config != null){
 	
 	// Check path is matching regex to avoid SQL injections
 	function checkPath($store, $id = null){
-		return preg_match('/^(\w|_|-)+$/', $store.$id);
+		return preg_match('/^(\w|_|-|%)+$/', $store.$id);
 	}
 	
 	// Send Json response
 	function jsonResponse($res, $code, $value = null){
 		return $res->withHeader('Content-Type', 'application/json; charset=utf-8')->withJson($value)->withStatus($code);
 	}
-	function notAllowed($res){
-		return jsonResponse($res, 403, array("message" => "You are not allowed to proceed this request!"));
+	function notAllowed($res, $detail){
+		return jsonResponse($res, 403, array("message" => "You are not allowed to proceed this request!", "detail" => $detail));
 	}
 	function notFound($res){
 		return jsonResponse($res, 404, array("message" => "Not found!"));
@@ -62,9 +62,6 @@ if($config != null){
 				$config->restrictions->all = null;
 			}
 			$restriction = property_exists($config->restrictions, $store) ? $config->restrictions->$store : $config->restrictions->all;
-			if(!property_exists($restriction, $type) && property_exists($config->restrictions->all, $type)){
-				$restriction->$type = $config->restrictions->all->$type;
-			}
 			if($restriction != null && property_exists($restriction, $type)){
 				$user = $req->getAttribute('user');
 				if($user != null && isset($user['role']) && $user['role'] == $restriction->$type){
@@ -72,7 +69,7 @@ if($config != null){
 				} else if(isset($user['expired']) && $user['expired'] == true){
 					$res = jsonResponse($res, 401, array("message" => "Token expired!"));
 				} else {
-					$res = notAllowed($res);
+					$res = notAllowed($res, $req->getAttribute('message'));
 				}
 			} else {
 				$res = $next($req, $res);
@@ -90,8 +87,9 @@ if($config != null){
 	
 	// Check token
 	$app->add(function($req, $res, $next) use($config){
-		$authorization = $req->getHeader('authorization')[0];
+		$authorization = $req->getHeader($config->jwtHeader)[0];
 		$finalReq = $req;
+        $finalReq = $req->withAttribute('message', $authorization);
 		if($authorization){
 			list($jwt) = sscanf($authorization, 'Bearer %s');
 			try{
@@ -103,7 +101,6 @@ if($config != null){
 				}
 			}
 		}
-		$res->getBody()->write('Test');
 		return $next($finalReq, $res);
 	});
 	
@@ -125,7 +122,7 @@ if($config != null){
 					$token = array(
 						"iss" => "http://pizi-rest",
 						"iat" => $time,
-						"exp" => $time + (60),
+						"exp" => $time + (60 * 60),
 						"user" => $login,
 						"role" => $result[0]->role
 					);
@@ -142,14 +139,53 @@ if($config != null){
 	
 	// Define get store
 	$app->get('/{store}', function($req, $res, $args) use($bdd) {
-		$store = $args['store'];	
+		$store = $args['store'];
+        $params = $req->getQueryParams();
+		
+        // Build query
+        $stringQuery = 'SELECT * FROM '.$store;
+        $init = false;
+        foreach ($params as $key => $value) {
+            if($key !== 'orderBy' && $key !== 'limitTo'){
+                if(!$init){
+                    $stringQuery .= ' WHERE ';
+                    $init = true;
+                } else {
+                    $stringQuery .= ' AND ';
+                }
+                if(strstr($key, '_lt')){
+                    $stringQuery .= substr($key, 0, sizeof($key) - 4) . ' < :' . $key;
+                } else if(strstr($key, '_gt')){
+                    $stringQuery .= substr($key, 0, sizeof($key) - 4) . ' > :' . $key;
+                } else {
+                    $stringQuery .= $key . ' = :' . $key;
+                } 
+            }
+        }
+        
+        // Limit query
+        if(isset($params['orderBy'])){
+            $stringQuery.= ' ORDER BY '.$params['orderBy'];
+        }
+        // Limit query
+        if(isset($params['limitTo'])){
+            $stringQuery.= ' LIMIT :limitTo';
+        }
+        
 		try{
-			$query = $bdd->prepare('SELECT * FROM '.$store);
+			$query = $bdd->prepare($stringQuery);
+            foreach ($params as $key => $value) {
+                if(is_int($value)){
+                   $query->bindValue($key, intval($value)); 
+                } else if($key !== 'orderBy') {
+                   $query->bindValue($key, $value); 
+                }
+            }
 			$query->execute();
 			$results = $query->fetchAll(PDO::FETCH_OBJ);
 			return jsonResponse($res, 200, $results);
 		} catch(PDOException $e){
-			return serverError($res, "Error with db!");
+			return serverError($res, "Error with db!" . $e);
 		}
 	})->add($checkAccess);
 	

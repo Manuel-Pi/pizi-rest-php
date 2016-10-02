@@ -1,12 +1,12 @@
 {
 	"db": {
-        "name": "pizi",
-		"host": "localhost",
-		"user": "root",
-		"password": ""
+		"name": "gladystorsion1",
+		"host": "cl2-sql4",
+		"user": "gladystorsion1",
+		"password": "shemonster"
 	},
 	"tokenKey": "p!z!R35t",
-    "jwtHeader": "authorization",
+    "jwtHeader": "gladystorsion",
 	"restrictions": {
 		"all": {
 			"put": 1,
@@ -16,7 +16,7 @@
 		"user": {
 			"get": 1
 		},
-		"comment": {
+		"comment":{
 			"put": 1,
 			"delete": 1
 		}
