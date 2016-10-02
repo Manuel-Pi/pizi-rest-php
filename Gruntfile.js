@@ -5,7 +5,7 @@ module.exports = function(grunt) {
 		libs: 'vendor/',
 		testFile: 'tests/',
 		//serverFolder: 'C:/wamp/www/pizi-rest',
-		serverFolder: '../../Servers/ApacheServer/gladystorsion',
+		serverFolder: '../../Servers/ApacheServer/pizi-rest',
 		copy: {
 			deployDev : {
 				files : [

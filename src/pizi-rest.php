@@ -69,7 +69,7 @@ if($config != null){
 				} else if(isset($user['expired']) && $user['expired'] == true){
 					$res = jsonResponse($res, 401, array("message" => "Token expired!"));
 				} else {
-					$res = notAllowed($res, $req->getAttribute('message'));
+					$res = notAllowed($res, $req->getAttribute('message'), print_r(user));
 				}
 			} else {
 				$res = $next($req, $res);

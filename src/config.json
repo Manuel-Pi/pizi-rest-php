@@ -1,12 +1,12 @@
 {
 	"db": {
-        "name": "pizi",
+        "name": "gladystorsion1",
 		"host": "localhost",
-		"user": "root",
-		"password": ""
+		"user": "pizi",
+		"password": "pizi"
 	},
 	"tokenKey": "p!z!R35t",
-    "jwtHeader": "authorization",
+    "jwtHeader": "gladystorsion",
 	"restrictions": {
 		"all": {
 			"put": 1,
